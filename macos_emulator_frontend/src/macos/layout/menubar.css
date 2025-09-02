@@ -30,12 +30,25 @@
   cursor: pointer;
 }
 
-.menu-item:hover {
+.menu-item:hover,
+.menu-item:focus-visible {
   background: rgba(255,255,255,0.08);
+  outline: none;
 }
 
-.apple {
-  font-size: 14px;
+.apple-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 6px;
   border-radius: 6px;
+  line-height: 0;
+}
+
+.apple-logo {
+  width: 14px;
+  height: 14px;
+  color: var(--mac-fg);
+  opacity: 0.95;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
 }
