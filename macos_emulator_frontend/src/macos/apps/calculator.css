@@ -32,8 +32,15 @@
   color: var(--mac-fg);
   font-size: 16px;
   cursor: pointer;
+  transition: background 120ms ease, transform 60ms ease;
 }
 .key:hover { background: rgba(255,255,255,0.12); }
+.key:active,
+.key:focus-visible {
+  background: rgba(255,255,255,0.16);
+  outline: none;
+  transform: translateY(1px);
+}
 
 .key-zero {
   grid-column: span 2;

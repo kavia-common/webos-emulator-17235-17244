@@ -57,6 +57,7 @@ export function EmulatorProvider({ children }) {
   const [desktopIcons] = useState([
     { id: 'ic-docs', name: 'Documents', icon: '📄', appId: 'finder' },
     { id: 'ic-notes', name: 'Notes', icon: '📝', appId: 'notes' },
+    { id: 'ic-calc', name: 'Calculator', icon: '🧮', appId: 'calculator' },
   ]);
 
   const zCounter = useRef(10);
