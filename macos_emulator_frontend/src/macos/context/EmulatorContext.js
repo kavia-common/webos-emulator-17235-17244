@@ -60,12 +60,17 @@ export function EmulatorProvider({ children }) {
     { id: 'ic-calc', name: 'Calculator', icon: '🧮', appId: 'calculator' },
   ]);
 
-  const zCounter = useRef(10);
+  // Start window z-index well above desktop/dock layers to ensure visibility and interactivity.
+  // Desktop uses z ~ 100, Dock ~ 850, Launchpad ~ 900, Menu ~ 1000.
+  // We keep windows in the 800+ range so they sit above desktop and below launchpad/menu.
+  const Z_BASE = 800;
+  const zCounter = useRef(Z_BASE);
 
   const bringToFront = useCallback((id) => {
     setWindows((prev) => {
-      const maxZ = Math.max(10, ...prev.map(w => w.zIndex || 10));
-      return prev.map(w => w.id === id ? { ...w, zIndex: maxZ + 1 } : w);
+      const maxZ = Math.max(Z_BASE, ...prev.map(w => (typeof w.zIndex === 'number' ? w.zIndex : Z_BASE)));
+      const nextZ = maxZ + 1;
+      return prev.map(w => w.id === id ? { ...w, zIndex: nextZ } : w);
     });
     setActiveWindowId(id);
   }, []);
@@ -101,6 +106,7 @@ export function EmulatorProvider({ children }) {
       const width = app.defaultSize?.width || 640;
       const height = app.defaultSize?.height || 480;
 
+      const newZ = (++zCounter.current < Z_BASE ? (zCounter.current = Z_BASE + 1) : zCounter.current);
       const newWin = {
         id,
         appId,
@@ -109,7 +115,7 @@ export function EmulatorProvider({ children }) {
         y: Math.round((areaH - height) / 3 + Math.random() * 40 - 20),
         width,
         height,
-        zIndex: (zCounter.current += 1),
+        zIndex: newZ,
         minimized: false,
         maximized: false,
         payload,
