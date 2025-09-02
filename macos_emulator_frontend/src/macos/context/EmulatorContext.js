@@ -63,13 +63,21 @@ export function EmulatorProvider({ children }) {
   // Start window z-index well above desktop/dock layers to ensure visibility and interactivity.
   // Desktop uses z ~ 100, Dock ~ 850, Launchpad ~ 900, Menu ~ 1000.
   // We keep windows in the 800+ range so they sit above desktop and below launchpad/menu.
-  const Z_BASE = 800;
+  // Ensure windows sit ABOVE the Dock (z ~ 850) but BELOW the MenuBar (z ~ 1000).
+  // Use a high base and cap to avoid climbing over the menu layer.
+  const Z_BASE = 950;
+  const Z_CAP = 999;
   const zCounter = useRef(Z_BASE);
 
   const bringToFront = useCallback((id) => {
     setWindows((prev) => {
-      const maxZ = Math.max(Z_BASE, ...prev.map(w => (typeof w.zIndex === 'number' ? w.zIndex : Z_BASE)));
-      const nextZ = maxZ + 1;
+      const currentMax = Math.max(Z_BASE, ...prev.map(w => (typeof w.zIndex === 'number' ? w.zIndex : Z_BASE)));
+      // Compute next z-index but cap under the menu bar.
+      let nextZ = currentMax + 1;
+      if (nextZ > Z_CAP) {
+        // Wrap back to base while preserving relative order by reassigning sequentially
+        nextZ = Z_BASE + 1;
+      }
       return prev.map(w => w.id === id ? { ...w, zIndex: nextZ } : w);
     });
     setActiveWindowId(id);
@@ -106,7 +114,11 @@ export function EmulatorProvider({ children }) {
       const width = app.defaultSize?.width || 640;
       const height = app.defaultSize?.height || 480;
 
-      const newZ = (++zCounter.current < Z_BASE ? (zCounter.current = Z_BASE + 1) : zCounter.current);
+      // Increment and cap z-index to remain below the menu bar layer.
+      let nextZ = zCounter.current + 1;
+      if (nextZ <= Z_BASE) nextZ = Z_BASE + 1;
+      if (nextZ > Z_CAP) nextZ = Z_BASE + 1;
+      zCounter.current = nextZ;
       const newWin = {
         id,
         appId,
@@ -115,7 +127,8 @@ export function EmulatorProvider({ children }) {
         y: Math.round((areaH - height) / 3 + Math.random() * 40 - 20),
         width,
         height,
-        zIndex: newZ,
+        // Ensure new windows appear above the Dock but below the Menu bar
+        zIndex: zCounter.current,
         minimized: false,
         maximized: false,
         payload,

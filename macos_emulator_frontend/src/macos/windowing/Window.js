@@ -106,9 +106,9 @@ export function Window({ win, children }) {
       </div>
       {!win.maximized && (
         <>
-          <div className="resize-handle right" onMouseDown={startResize('right')} />
-          <div className="resize-handle bottom" onMouseDown={startResize('bottom')} />
-          <div className="resize-handle corner" onMouseDown={startResize('corner')} />
+          <div className="resize-handle right" onPointerDown={startResize('right')} />
+          <div className="resize-handle bottom" onPointerDown={startResize('bottom')} />
+          <div className="resize-handle corner" onPointerDown={startResize('corner')} />
         </>
       )}
     </section>
