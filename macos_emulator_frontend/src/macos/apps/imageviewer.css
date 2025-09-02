@@ -1,0 +1,103 @@
+.iv-root {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100%;
+}
+
+.iv-sidebar {
+  padding: 8px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+}
+
+.iv-list {
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.iv-item {
+  background: transparent;
+  border: 0;
+  color: var(--mac-fg);
+  text-align: left;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.iv-item:hover { background: rgba(255,255,255,0.06); }
+.iv-item.active { background: rgba(255,255,255,0.12); }
+
+.iv-thumb {
+  width: 56px; height: 40px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.iv-name { font-size: 12px; }
+
+.iv-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.iv-btn {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+  cursor: pointer;
+}
+.iv-zoom { font-size: 12px; opacity: 0.9; }
+
+.iv-canvas {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.02);
+}
+
+.iv-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center center;
+  transition: transform 40ms linear;
+}
+
+.img-demo {
+  width: 720px;
+  height: 460px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: var(--shadow-md);
+}
+
+.img-demo.aurora {
+  background:
+    radial-gradient(800px 600px at 10% 10%, rgba(0,122,255,0.6), transparent 60%),
+    radial-gradient(600px 800px at 90% 20%, rgba(50,215,75,0.5), transparent 65%),
+    radial-gradient(600px 600px at 60% 120%, rgba(255,69,58,0.45), transparent 65%),
+    #0f0f12;
+}
+
+.img-demo.sunset {
+  background:
+    radial-gradient(800px 500px at 50% -10%, rgba(255, 90, 0, 0.6), transparent 60%),
+    radial-gradient(600px 700px at 80% 20%, rgba(255, 0, 90, 0.5), transparent 65%),
+    radial-gradient(600px 600px at 10% 120%, rgba(255, 210, 0, 0.45), transparent 65%),
+    #0f0f12;
+}
+
+.img-demo.ocean {
+  background:
+    radial-gradient(900px 700px at 30% 10%, rgba(0, 140, 255, 0.6), transparent 60%),
+    radial-gradient(600px 600px at 90% 50%, rgba(0, 200, 200, 0.55), transparent 65%),
+    radial-gradient(600px 600px at 50% 120%, rgba(0, 70, 255, 0.45), transparent 65%),
+    #0f0f12;
+}

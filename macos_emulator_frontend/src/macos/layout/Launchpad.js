@@ -16,6 +16,8 @@ export function Launchpad() {
             key={app.id}
             className="lp-item"
             onClick={() => actions.openApp(app.id)}
+            aria-label={`Open ${app.name}`}
+            title={app.name}
           >
             <div className="lp-emoji">{app.icon}</div>
             <div className="lp-name">{app.name}</div>

@@ -1,0 +1,81 @@
+.wb-root {
+  display: grid;
+  grid-template-rows: 40px 1fr;
+  height: 100%;
+}
+
+.wb-toolbar {
+  display: grid;
+  grid-template-columns: 140px 1fr 220px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.wb-nav {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.wb-btn {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+  cursor: pointer;
+}
+.wb-btn:disabled { opacity: 0.5; cursor: default; }
+
+.wb-address input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+}
+
+.wb-tab {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.wb-content {
+  overflow: auto;
+  padding: 12px;
+}
+
+.wb-page {
+  display: grid;
+  gap: 12px;
+}
+
+.wb-link {
+  border: 0;
+  color: var(--mac-accent);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.card {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+}
+
+.wb-reload {
+  animation: wbFlash 220ms ease-out;
+}
+
+@keyframes wbFlash {
+  from { background: rgba(255,255,255,0.04); }
+  to { background: transparent; }
+}

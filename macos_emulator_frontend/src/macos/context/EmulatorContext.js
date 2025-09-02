@@ -2,6 +2,11 @@ import React, { createContext, useCallback, useContext, useMemo, useRef, useStat
 import { FinderApp } from '../apps/Finder';
 import { NotesApp } from '../apps/Notes';
 import { CalculatorApp } from '../apps/Calculator';
+import { WebBrowserApp } from '../apps/WebBrowser';
+import { TerminalApp } from '../apps/Terminal';
+import { TextEditorApp } from '../apps/TextEditor';
+import { ImageViewerApp } from '../apps/ImageViewer';
+import { SettingsApp } from '../apps/Settings';
 
 /**
  * Window and App types
@@ -31,6 +36,46 @@ const initialApps = {
     singleInstance: true,
     defaultSize: { width: 320, height: 420 },
   },
+  browser: {
+    id: 'browser',
+    name: 'Browser',
+    icon: '🌐',
+    component: WebBrowserApp,
+    singleInstance: false,
+    defaultSize: { width: 900, height: 600 },
+  },
+  terminal: {
+    id: 'terminal',
+    name: 'Terminal',
+    icon: '🖥️',
+    component: TerminalApp,
+    singleInstance: false,
+    defaultSize: { width: 720, height: 420 },
+  },
+  editor: {
+    id: 'editor',
+    name: 'Text Editor',
+    icon: '📝',
+    component: TextEditorApp,
+    singleInstance: false,
+    defaultSize: { width: 720, height: 520 },
+  },
+  images: {
+    id: 'images',
+    name: 'Images',
+    icon: '🖼️',
+    component: ImageViewerApp,
+    singleInstance: false,
+    defaultSize: { width: 900, height: 600 },
+  },
+  settings: {
+    id: 'settings',
+    name: 'Settings',
+    icon: '⚙️',
+    component: SettingsApp,
+    singleInstance: true,
+    defaultSize: { width: 520, height: 480 },
+  },
 };
 
 const EmulatorContext = createContext(null);
@@ -55,9 +100,14 @@ export function EmulatorProvider({ children }) {
   const [activeWindowId, setActiveWindowId] = useState(null);
   const [showLaunchpad, setShowLaunchpad] = useState(false);
   const [desktopIcons] = useState([
-    { id: 'ic-docs', name: 'Documents', icon: '📄', appId: 'finder' },
+    { id: 'ic-docs', name: 'Finder', icon: '📁', appId: 'finder' },
     { id: 'ic-notes', name: 'Notes', icon: '📝', appId: 'notes' },
     { id: 'ic-calc', name: 'Calculator', icon: '🧮', appId: 'calculator' },
+    { id: 'ic-browser', name: 'Browser', icon: '🌐', appId: 'browser' },
+    { id: 'ic-term', name: 'Terminal', icon: '🖥️', appId: 'terminal' },
+    { id: 'ic-editor', name: 'Editor', icon: '📝', appId: 'editor' },
+    { id: 'ic-images', name: 'Images', icon: '🖼️', appId: 'images' },
+    { id: 'ic-settings', name: 'Settings', icon: '⚙️', appId: 'settings' },
   ]);
 
   // Start window z-index well above desktop/dock layers to ensure visibility and interactivity.
