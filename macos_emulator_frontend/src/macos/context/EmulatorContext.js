@@ -76,6 +76,15 @@ export function EmulatorProvider({ children }) {
     setShowLaunchpad(false);
 
     setWindows(prev => {
+      // First try: if any window of this app is minimized, restore the most recently created one
+      const minimizedWins = prev.filter(w => w.appId === appId && w.minimized);
+      if (minimizedWins.length > 0) {
+        // choose the most recent by zIndex
+        const toRestore = minimizedWins.reduce((a, b) => (a.zIndex > b.zIndex ? a : b));
+        bringToFront(toRestore.id);
+        return prev.map(w => w.id === toRestore.id ? { ...w, minimized: false } : w);
+      }
+
       // If single instance and exists, just focus it
       if (app.singleInstance) {
         const existing = prev.find(w => w.appId === appId);
@@ -103,6 +112,7 @@ export function EmulatorProvider({ children }) {
         minimized: false,
         maximized: false,
         payload,
+        prevBounds: null,
       };
       setActiveWindowId(id);
       return [...prev, newWin];
@@ -123,10 +133,16 @@ export function EmulatorProvider({ children }) {
     setWindows(prev => prev.map(w => {
       if (w.id !== id) return w;
       if (w.maximized) {
-        // restore
+        // restore to previous bounds if available
+        if (w.prevBounds) {
+          const { x, y, width, height } = w.prevBounds;
+          return { ...w, maximized: false, x, y, width, height, prevBounds: null };
+        }
         return { ...w, maximized: false };
       }
-      return { ...w, maximized: true, minimized: false };
+      // store current bounds then maximize
+      const prevBounds = { x: w.x, y: w.y, width: w.width, height: w.height };
+      return { ...w, maximized: true, minimized: false, prevBounds };
     }));
     bringToFront(id);
   }, [bringToFront]);

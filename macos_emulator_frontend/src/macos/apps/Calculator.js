@@ -34,17 +34,32 @@ export function CalculatorApp() {
    * - operator: '+', '-', '×', '÷' | null
    * - overwrite: if next digit should start a new entry
    * - hasTyped: tracks whether user typed since last clear to toggle C/AC label
+   * - lastOperator/lastOperand: to support repeated '=' presses
    */
   const [display, setDisplay] = useState('0');
   const [accumulator, setAccumulator] = useState(null);
   const [operator, setOperator] = useState(null);
   const [overwrite, setOverwrite] = useState(true);
   const [hasTyped, setHasTyped] = useState(false);
+  const [lastOperator, setLastOperator] = useState(null);
+  const [lastOperand, setLastOperand] = useState(null);
 
   // Track long-press to force All Clear
   const clearPressTimer = useRef(null);
 
   const clearLabel = hasTyped ? 'C' : 'AC';
+
+  const resetLongPressTimer = () => {
+    if (clearPressTimer.current) {
+      window.clearTimeout(clearPressTimer.current);
+      clearPressTimer.current = null;
+    }
+  };
+
+  useEffect(() => {
+    // Safety: clear any pending timer if component unmounts
+    return () => resetLongPressTimer();
+  }, []);
 
   const inputDigit = useCallback((d) => {
     if (display === 'Error') {
@@ -54,6 +69,8 @@ export function CalculatorApp() {
       setOperator(null);
       setOverwrite(false);
       setHasTyped(true);
+      setLastOperator(null);
+      setLastOperand(null);
       return;
     }
     setHasTyped(true);
@@ -74,6 +91,8 @@ export function CalculatorApp() {
       setOperator(null);
       setOverwrite(false);
       setHasTyped(true);
+      setLastOperator(null);
+      setLastOperand(null);
       return;
     }
     setHasTyped(true);
@@ -108,6 +127,8 @@ export function CalculatorApp() {
       setOperator(nextOp);
       setOverwrite(true);
       setHasTyped(false);
+      setLastOperator(null);
+      setLastOperand(null);
       return;
     }
 
@@ -115,22 +136,29 @@ export function CalculatorApp() {
     setAccumulator((prevAcc) => {
       const currVal = Number(display);
       if (operator && prevAcc != null && !overwrite) {
-        // If there is an existing operator and user has just entered a number, resolve first
+        // Resolve chain: prevAcc (op) currVal
         const result = compute(prevAcc, currVal, operator);
         const out = formatNumber(result);
         setDisplay(out);
         setOperator(nextOp);
         setOverwrite(true);
+        // prepare for repeat '=' after a subsequent equal
+        setLastOperator(nextOp); // last op becomes the newly selected pending op
+        setLastOperand(null); // clear last operand until '=' pressed
         return out === 'Error' ? null : Number(result);
       } else if (prevAcc == null) {
         // First operator press: move current display into accumulator
         setOperator(nextOp);
         setOverwrite(true);
+        setLastOperator(nextOp);
+        setLastOperand(null);
         return Number(currVal);
       } else {
-        // Changing operator without entering a new number
+        // Changing operator without a new number
         setOperator(nextOp);
         setOverwrite(true);
+        setLastOperator(nextOp);
+        setLastOperand(null);
         return prevAcc;
       }
     });
@@ -144,20 +172,44 @@ export function CalculatorApp() {
       setOperator(null);
       setOverwrite(true);
       setHasTyped(false);
+      setLastOperator(null);
+      setLastOperand(null);
       return;
     }
+
+    const currVal = Number(display);
+
     setAccumulator((prevAcc) => {
-      if (operator == null || prevAcc == null) return prevAcc;
-      const currVal = Number(display);
-      const result = compute(prevAcc, currVal, operator);
-      const out = formatNumber(result);
-      setDisplay(out);
-      setOperator(null);
-      setOverwrite(true);
-      setHasTyped(false);
-      return null;
+      if (operator != null && prevAcc != null) {
+        // Standard case: we have a pending operator and accumulator
+        const result = compute(prevAcc, currVal, operator);
+        const out = formatNumber(result);
+        setDisplay(out);
+        setOverwrite(true);
+        setHasTyped(false);
+        // Store last op/operand for repeat '='
+        setLastOperator(operator);
+        setLastOperand(currVal);
+        setOperator(null);
+        return null;
+      }
+
+      // Repeat '=' behavior: no operator pending, but we have lastOperator and lastOperand
+      if (lastOperator != null && lastOperand != null) {
+        const base = Number(display);
+        const result = compute(base, lastOperand, lastOperator);
+        const out = formatNumber(result);
+        setDisplay(out);
+        setOverwrite(true);
+        setHasTyped(false);
+        // keep lastOperator/lastOperand for further repeats
+        return null;
+      }
+
+      // Nothing to do
+      return prevAcc;
     });
-  }, [compute, display, operator]);
+  }, [compute, display, operator, lastOperator, lastOperand]);
 
   const doClear = useCallback((forceAll = false) => {
     // If forceAll is true, behave as AC regardless of hasTyped
@@ -168,6 +220,8 @@ export function CalculatorApp() {
       setOperator(null);
       setOverwrite(true);
       setHasTyped(false);
+      setLastOperator(null);
+      setLastOperand(null);
     } else {
       // Clear entry
       setDisplay('0');
@@ -238,13 +292,13 @@ export function CalculatorApp() {
 
   const shownDisplay = useMemo(() => display, [display]);
 
-  // Button layout similar to iOS calculator feel
+  // Button layout: standard 4x5 with wide zero and right column operators
   const keys = [
-    clearLabel,'÷','×','-',
+    clearLabel, '÷', '×', '-',
     '7','8','9','+',
     '4','5','6','=',
     '1','2','3','.',
-    '0'
+    '0' // will span two columns via CSS class
   ];
 
   // Render
@@ -257,28 +311,19 @@ export function CalculatorApp() {
         {keys.map((k) => (
           <button
             key={k}
-            className="key"
+            className={`key ${k === '0' ? 'key-zero' : ''}`}
             onClick={() => press(k)}
-            onMouseDown={(e) => {
+            onMouseDown={() => {
               if (k === 'AC' || k === 'C') {
                 // Long press to force AC
+                resetLongPressTimer();
                 clearPressTimer.current = window.setTimeout(() => {
                   doClear(true);
                 }, 600);
               }
             }}
-            onMouseUp={() => {
-              if (clearPressTimer.current) {
-                window.clearTimeout(clearPressTimer.current);
-                clearPressTimer.current = null;
-              }
-            }}
-            onMouseLeave={() => {
-              if (clearPressTimer.current) {
-                window.clearTimeout(clearPressTimer.current);
-                clearPressTimer.current = null;
-              }
-            }}
+            onMouseUp={resetLongPressTimer}
+            onMouseLeave={resetLongPressTimer}
             aria-label={`Key ${k}`}
           >
             {k}
