@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './calculator.css';
 
 // Light utility to format numbers and clamp display length
 const MAX_LEN = 16;
 function formatNumber(n) {
-  if (n === Infinity || Number.isNaN(n)) return 'Error';
+  // Normalize error conditions (NaN, Infinity) into "Error"
+  if (!Number.isFinite(Number(n))) return 'Error';
   const str = String(n);
   if (str.length <= MAX_LEN) return str;
   // Use exponential for very long strings
@@ -40,9 +41,21 @@ export function CalculatorApp() {
   const [overwrite, setOverwrite] = useState(true);
   const [hasTyped, setHasTyped] = useState(false);
 
+  // Track long-press to force All Clear
+  const clearPressTimer = useRef(null);
+
   const clearLabel = hasTyped ? 'C' : 'AC';
 
   const inputDigit = useCallback((d) => {
+    if (display === 'Error') {
+      // Start fresh after an error when typing a digit
+      setDisplay(d);
+      setAccumulator(null);
+      setOperator(null);
+      setOverwrite(false);
+      setHasTyped(true);
+      return;
+    }
     setHasTyped(true);
     setDisplay((curr) => {
       if (overwrite || curr === '0') {
@@ -52,9 +65,17 @@ export function CalculatorApp() {
       const next = curr + d;
       return next.length > MAX_LEN ? curr : next;
     });
-  }, [overwrite]);
+  }, [display, overwrite]);
 
   const inputDot = useCallback(() => {
+    if (display === 'Error') {
+      setDisplay('0.');
+      setAccumulator(null);
+      setOperator(null);
+      setOverwrite(false);
+      setHasTyped(true);
+      return;
+    }
     setHasTyped(true);
     setDisplay((curr) => {
       if (overwrite) {
@@ -64,7 +85,7 @@ export function CalculatorApp() {
       if (curr.includes('.')) return curr;
       return curr + '.';
     });
-  }, [overwrite]);
+  }, [display, overwrite]);
 
   const compute = useCallback((a, b, op) => {
     if (a == null || b == null || op == null) return b ?? a ?? 0;
@@ -80,6 +101,16 @@ export function CalculatorApp() {
   }, []);
 
   const setOp = useCallback((nextOp) => {
+    if (display === 'Error') {
+      // After error, setting an operator should reset to 0 then set operator
+      setDisplay('0');
+      setAccumulator(0);
+      setOperator(nextOp);
+      setOverwrite(true);
+      setHasTyped(false);
+      return;
+    }
+
     setHasTyped(false);
     setAccumulator((prevAcc) => {
       const currVal = Number(display);
@@ -90,7 +121,7 @@ export function CalculatorApp() {
         setDisplay(out);
         setOperator(nextOp);
         setOverwrite(true);
-        return (out === 'Error') ? null : Number(result);
+        return out === 'Error' ? null : Number(result);
       } else if (prevAcc == null) {
         // First operator press: move current display into accumulator
         setOperator(nextOp);
@@ -128,17 +159,18 @@ export function CalculatorApp() {
     });
   }, [compute, display, operator]);
 
-  const doClear = useCallback(() => {
-    if (hasTyped) {
-      // Clear entry
-      setDisplay('0');
-      setOverwrite(true);
-      setHasTyped(false);
-    } else {
+  const doClear = useCallback((forceAll = false) => {
+    // If forceAll is true, behave as AC regardless of hasTyped
+    if (forceAll || !hasTyped) {
       // All clear
       setDisplay('0');
       setAccumulator(null);
       setOperator(null);
+      setOverwrite(true);
+      setHasTyped(false);
+    } else {
+      // Clear entry
+      setDisplay('0');
       setOverwrite(true);
       setHasTyped(false);
     }
@@ -179,6 +211,11 @@ export function CalculatorApp() {
       }
       if (key === 'Backspace') {
         e.preventDefault();
+        // Backspace should function as CE (clear entry character)
+        if (display === 'Error') {
+          doClear(true);
+          return;
+        }
         setHasTyped(true);
         setDisplay((curr) => {
           if (overwrite) return '0';
@@ -192,12 +229,12 @@ export function CalculatorApp() {
       }
       if (key.toLowerCase() === 'c' || key === 'Escape') {
         e.preventDefault();
-        doClear();
+        doClear(key === 'Escape'); // Esc forces AC
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [doEqual, doClear, inputDigit, inputDot, setOp, overwrite]);
+  }, [doEqual, doClear, inputDigit, inputDot, setOp, overwrite, display]);
 
   const shownDisplay = useMemo(() => display, [display]);
 
@@ -222,6 +259,26 @@ export function CalculatorApp() {
             key={k}
             className="key"
             onClick={() => press(k)}
+            onMouseDown={(e) => {
+              if (k === 'AC' || k === 'C') {
+                // Long press to force AC
+                clearPressTimer.current = window.setTimeout(() => {
+                  doClear(true);
+                }, 600);
+              }
+            }}
+            onMouseUp={() => {
+              if (clearPressTimer.current) {
+                window.clearTimeout(clearPressTimer.current);
+                clearPressTimer.current = null;
+              }
+            }}
+            onMouseLeave={() => {
+              if (clearPressTimer.current) {
+                window.clearTimeout(clearPressTimer.current);
+                clearPressTimer.current = null;
+              }
+            }}
             aria-label={`Key ${k}`}
           >
             {k}
