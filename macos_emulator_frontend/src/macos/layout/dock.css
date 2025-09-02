@@ -1,0 +1,55 @@
+.dock-wrap {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  width: auto;
+  z-index: var(--z-dock);
+  pointer-events: none;
+}
+
+.dock {
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  pointer-events: all;
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: var(--shadow-md);
+}
+
+.dock-item {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 0;
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.dock-item:hover {
+  transform: translateY(-4px) scale(1.05);
+  background: rgba(255,255,255,0.12);
+}
+
+.dock-emoji {
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.dot {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--mac-fg);
+  border-radius: 50%;
+  opacity: 0.85;
+}

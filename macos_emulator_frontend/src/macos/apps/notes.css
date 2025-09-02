@@ -1,0 +1,61 @@
+.notes {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: 100%;
+}
+
+.notes-list {
+  padding: 8px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 8px;
+}
+
+.notes-new {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+  cursor: pointer;
+}
+
+.notes-items {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notes-item {
+  background: transparent;
+  border: 0;
+  color: var(--mac-fg);
+  text-align: left;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.notes-item:hover { background: rgba(255,255,255,0.06); }
+.notes-item.active { background: rgba(255,255,255,0.12); }
+
+.notes-item .title { font-size: 13px; }
+.notes-item .preview { font-size: 11px; opacity: 0.7; }
+
+.notes-editor {
+  padding: 8px;
+}
+
+.notes-textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+  outline: none;
+}

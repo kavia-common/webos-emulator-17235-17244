@@ -1,0 +1,56 @@
+.launchpad {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-launchpad);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  background: rgba(0,0,0,0.25);
+}
+
+.launchpad-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 96px);
+  gap: 16px;
+  padding: 24px;
+  max-width: 900px;
+  width: calc(100% - 48px);
+  min-height: 280px;
+  justify-content: center;
+}
+
+.lp-item {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  border: 0;
+  background: rgba(255,255,255,0.06);
+  color: var(--mac-fg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.lp-item:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.lp-emoji { font-size: 28px; }
+.lp-name { font-size: 12px; opacity: 0.9; }
+
+.launchpad-dismiss {
+  position: absolute;
+  top: calc(var(--menubar-height) + 12px);
+  right: 12px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: var(--mac-fg);
+  cursor: pointer;
+}
